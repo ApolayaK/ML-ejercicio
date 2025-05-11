@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <style>
+    body{
+      background-color: antiquewhite;
+    }
+  </style>
+  
+  <!--P5js Gestion dinamica/rapida de JS-->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.min.js"></script>
+  <!--ML5 = Machine Learning-->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  
+  <script>
+    //Objetos
+    let handPose
+    let video
+    let hands = []
+
+    //Precarga
+    function preload(){
+      handPose = ml5.handPose()
+    }
+
+    //Configuracion
+    function setup(){
+      createCanvas(640,480)
+
+      video = createCapture(VIDEO)
+      video.size(640,480)
+      video.hide()
+      //Iniciar deteccion (input, output)
+      handPose.detectStart(video, gotHands)
+    }
+
+    //Render
+    function draw(){
+      image(video, 0 ,0 , width, height)
+
+      //Verificando si detectamos una mano
+      if(hands.length > 0){
+        //Identificar la ubicacion de los dedos
+        let finger = hands[0].index_finger_tip
+        let thumb = hands[0].thumb_tip
+
+        let centerX = (finger.x + thumb.x)/2
+        let centerY = (finger.y + thumb.y)/2
+
+        //Distancia entre los dedos ( determinara el tamaño del circulo)
+        let pinch = dist(finger.x, finger.y, thumb.x, thumb.y)
+
+        // Cambiar color según el tamaño del círculo
+        if (pinch < 30) {
+          fill(255); // blanco
+        } else if (pinch < 100) {
+          fill(0, 0, 255); // azul
+        } else {
+          fill(255, 0, 0); // rojo
+        }
+
+        stroke(255) 
+        strokeWeight(2) 
+        circle(centerX, centerY, pinch)
+      }
+    }
+
+    //Analisis iterativo
+    function gotHands(results){
+      hands = results
+    }
+  </script>
+</body>
+</html>
